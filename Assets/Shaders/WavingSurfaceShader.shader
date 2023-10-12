@@ -13,14 +13,12 @@ Shader "Custom/WavingSurfaceShader"
         Tags { "RenderType"="Opaque" }
         LOD 200
 
-        
-        Cull Off
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
+
         #pragma vertex vert
 
-        
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
@@ -45,22 +43,23 @@ Shader "Custom/WavingSurfaceShader"
 
         void vert(inout appdata_full v)
         {
-            //World position of the vertex
+            // world pos of vertex
             float4 world = mul(unity_ObjectToWorld, v.vertex);
 
-            //distance from the flag pivot in pure x value
+            // dist from the flag pivot in pure x vals
             float dist = abs(_FlagPivot.x - world.x);
 
-            //change amplitude based on distance from pivot
+            // change amplitude based on distance from point
             float amplitude = 0.11 * dist;
 
-            //offset vertex in the z direction based on the sine wave
+            // offset vertex in the z direction based on the sine wave
             world.z += amplitude * sin(_Time.y + world.x);
 
-            //Set the vertex in v to the new position
+            // Set the vertex in v to the new pos
             v.vertex = mul(unity_WorldToObject, world);
         }
-        
+
+
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Albedo comes from a texture tinted by color
