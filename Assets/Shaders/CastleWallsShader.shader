@@ -1,4 +1,4 @@
-Shader "Custom/ScrollingSurfaceShader"
+Shader "Custom/CastleWallsShader"
 {
     Properties
     {
@@ -15,8 +15,6 @@ Shader "Custom/ScrollingSurfaceShader"
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
-
-         #pragma vertex vert
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -39,29 +37,23 @@ Shader "Custom/ScrollingSurfaceShader"
             // put more per-instance properties here
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        void vert(inout appdata_full v)
-        {
-            // world pos of vertex
-            float4 world = mul(unity_ObjectToWorld, v.vertex);
-
-            // dist from origin
-            float dist = abs(world.x);
-
-            float amplitude = 5.;
-            float speed = 3.;
-
-            // offset vertex in the z direction based on the sine wave
-            world.y += amplitude * sin(_Time.y * speed + world.z/1.5);
-
-            // Set the vertex in v to the new pos
-            v.vertex = mul(unity_WorldToObject, world);
-        }
-
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex + float2(_Time.y, 0.)) * _Color;
-            o.Albedo = c.rgb;
+            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            float2 st = IN.uv_MainTex;
+            float scale = 1.;
+            float2 scaledSt = st * scale;
+            float2 stUV = frac(scaledSt);
+            float2 stID = floor(scaledSt);
+
+            float brickMask = 1. - smoothstep(0.2, 0.3, c.xyz/3.);
+
+            float brickHighlights = 1. - smoothstep(0.05, 0.2, c.xyz/3.);
+
+
+            //o.Albedo = c.rgb + float3(1.,1., 1.) * IN.uv_MainTex.y/8.;
+            o.Albedo = float3(0., sin(st.x) / 2. + 1., sin(st.y + 0.5) / 2. + 1.) * brickMask * 0.4 + float3(brickHighlights,brickHighlights,brickHighlights);
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
